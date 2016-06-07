@@ -101,54 +101,60 @@ class DbHandler {
 		$result = array();
 		
 		if($type == "studente") {
-			$query = "SELECT * FROM studenti where nome = " . $testo . " OR cognome = " . $testo;
+			$query = "SELECT * FROM studenti where nome = '?' OR cognome = '?'";
 		} elseif($type == "dirigente") {
-			$query = "SELECT * FROM dirigenti where nome = " . $testo . " OR cognome = " . $testo;
+			$query = "SELECT * FROM dirigenti where nome = ? OR cognome = ?";
 		} else {
 			$flag = true;
-			$query1 = "SELECT * FROM studenti";/* where nome = " . $testo . " OR cognome = " . $testo;*/
-			$query2 = "SELECT * FROM dirigenti";/* where nome = " . $testo . " OR cognome = " . $testo;*/
+			$query1 = "SELECT * FROM studenti where nome = '?' OR cognome = '?'";
+			$query2 = "SELECT * FROM dirigenti where nome = '?' OR cognome = '?'";
 			
 			$stmt = $this->conn->prepare($query1);
+			$stmt->bind_param('ss', $testo, $testo);
 			$stmt->execute();
 			$tasks = $stmt->get_result();
 			
-			while ($utente = $tasks->fetch_assoc()) { //Per studenti
+			while ($utente = $tasks->fetch_array()) { //Per studenti
 				$tmp = array();
 				$tmp['id'] = $utente['matricola'];
 				$tmp['nome'] = $utente['nome'];
 				$tmp['tipo'] = 'studente';
 				$tmp['cognome'] = $utente['cognome'];
 				$tmp['email'] = $utente['email'];
-				array_push($result,$tmp);
+				
+				$obj = (object) $tmp;
+				array_push($result, $obj);
 			}
 			
 			$stmt = $this->conn->prepare($query2);
+			$stmt->bind_param("s", $testo);
+			$stmt->bind_param("s", $testo);
 			$stmt->execute();
 			$tasks = $stmt->get_result();
 			
-			while ($utente = $tasks->fetch_assoc()) { //Per dirigenti
+			while ($utente = $tasks->fetch_array()) { //Per dirigenti
 				$tmp = array();
-				
 				  $tmp['id'] = $utente['idDirigenti'];
 				  $tmp['nome'] = $utente['nome'];
 				  $tmp['email'] = $utente['email'];
 				  $tmp['cognome'] = $utente['cognome'];
 				  $tmp['tipo'] = 'Dirigente';
-					
+				
 				if($utente['Prof'] == 'Y') {
 					$tmp['tipo'] = 'Professore';
 				}
-				array_push($result,$tmp);
+				
+				$obj = (object) $tmp;
+				array_push($result, $obj);
 			}
-			
 			$stmt->close();
 			return $result;
 		}
 		
 		if(!flag) {
 			$stmt = $this->conn->prepare($query);
-			$stmt->bind_param("i", $user_id);
+			$stmt->bind_param("s", $testo);
+			$stmt->bind_param("s", $testo);
 			$stmt->execute();
 			$tasks = $stmt->get_result();
 			while ($utente = $tasks->fetch_assoc()) {
@@ -190,7 +196,6 @@ class DbHandler {
     /*
      * Restituisce tutti gli studenti
      */
-
     public function getAllUser() {
         $query = "SELECT * FROM Studenti";
 

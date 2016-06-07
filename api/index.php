@@ -181,6 +181,7 @@ $app->get('/searchUtente/:type/:testo', function($type,$testo) { //DA VERIFICARE
     $db = new DbHandler();
 
         $result = $db->getAllSearched($type,$testo);
+		
         if(count($result) > 0) {
 			echoResponse(200, $result);
 		} else {
