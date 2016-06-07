@@ -63,10 +63,10 @@ class DbHandler {
      * Ritorna il dirigente
      */
     public function getDirigente($id) {
-        $query = "SELECT * FROM dirigenti WHERE id = ?";
+        $query = "SELECT * FROM dirigenti WHERE idDirigenti = ?";
         
         $stm = $this->conn->prepare($query);
-        $stm->bind_param("s",$id);
+        $stm->bind_param('s',$id);
         
         if($stm->execute()) {
             $dirigente = $stm->get_result()->fetch_assoc();
@@ -80,11 +80,11 @@ class DbHandler {
 	/*
 	 * Ritorna lo studente
 	 */
-	public function getStudente($id) {
-		$query = "SELECT * FROM studenti WHERE id = ?";
+	public function getStudente($id) { //FUNZIONA
+		$query = "SELECT * FROM studenti WHERE matricola = ?";
         
         $stm = $this->conn->prepare($query);
-        $stm->bind_param("s",$id);
+        $stm->bind_param('s',$id);
         
         if($stm->execute()) {
             $studente = $stm->get_result()->fetch_assoc();
@@ -95,19 +95,22 @@ class DbHandler {
         }
 	}
 	
-	public function getAllSearched($type,$testo) {
+	/*
+	 * Risponde alla ricerca fatta dal client e fornisce una parte di informazioni
+	 */ 
+	public function getAllSearched($type,$testo) { //FUNZIONANTE
 		$query = "";
 		$flag = false;
 		$result = array();
 		
-		if($type == "studente") {
-			$query = "SELECT * FROM studenti where nome = '?' OR cognome = '?'";
-		} elseif($type == "dirigente") {
+		if($type == "Studente") {
+			$query = "SELECT * FROM studenti where nome = ? OR cognome = ?";
+		} elseif($type == "Dirigente") {
 			$query = "SELECT * FROM dirigenti where nome = ? OR cognome = ?";
 		} else {
 			$flag = true;
-			$query1 = "SELECT * FROM studenti where nome = '?' OR cognome = '?'";
-			$query2 = "SELECT * FROM dirigenti where nome = '?' OR cognome = '?'";
+			$query1 = "SELECT * FROM studenti where nome = ? OR cognome = ?";
+			$query2 = "SELECT * FROM dirigenti where nome = ? OR cognome = ?";
 			
 			$stmt = $this->conn->prepare($query1);
 			$stmt->bind_param('ss', $testo, $testo);
@@ -118,7 +121,7 @@ class DbHandler {
 				$tmp = array();
 				$tmp['id'] = $utente['matricola'];
 				$tmp['nome'] = $utente['nome'];
-				$tmp['tipo'] = 'studente';
+				$tmp['tipo'] = 'Studente';
 				$tmp['cognome'] = $utente['cognome'];
 				$tmp['email'] = $utente['email'];
 				
@@ -127,8 +130,8 @@ class DbHandler {
 			}
 			
 			$stmt = $this->conn->prepare($query2);
-			$stmt->bind_param("s", $testo);
-			$stmt->bind_param("s", $testo);
+			$stmt->bind_param('ss', $testo,$testo);
+			//$stmt->bind_param("s", $testo);
 			$stmt->execute();
 			$tasks = $stmt->get_result();
 			
@@ -151,22 +154,27 @@ class DbHandler {
 			return $result;
 		}
 		
-		if(!flag) {
+		if(!$flag) {
 			$stmt = $this->conn->prepare($query);
-			$stmt->bind_param("s", $testo);
-			$stmt->bind_param("s", $testo);
+			$stmt->bind_param('ss', $testo,$testo);
 			$stmt->execute();
 			$tasks = $stmt->get_result();
-			while ($utente = $tasks->fetch_assoc()) {
+			$idUtente = "idDirigenti";
+			if($type == "Studente") {
+				$idUtente = "matricola";
+			}
+			while ($utente = $tasks->fetch_array()) {
 				$tmp = array();
 				
-				  $tmp['id'] = $utente['idDirigenti'];
+				
+				  $tmp['id'] = $utente[$idUtente];
 				  $tmp['nome'] = $utente['nome'];
 				  $tmp['email'] = $utente['email'];
 				  $tmp['cognome'] = $utente['cognome'];
 				  $tmp['tipo'] = $type;
-				
-				array_push($result,$tmp);
+				  
+				  $obj = (object) $tmp;
+				array_push($result,$obj);
 			}
 			
 			$stmt->close();

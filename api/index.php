@@ -146,36 +146,37 @@ $app->get('/get_dirigente/:id', function($id_dir) { //DA VERIFICARE SE FUNZIONA
         $dirigente = $db->getDirigente($id_dir);
         if($dirigente != null) {
           if($dirigente['Prof'] == 'Y') {
-              $response['WebDirigente'] = $dirigente['WebDirigente'];
-              $response['RicevimentoDirigente'] = $dirigente['RicevimentoDirigente'];
+              $response['WebDirigente'] = $dirigente['Web'];
+              $response['RicevimentoDirigente'] = $dirigente['Ricevimento'];
           }
-          $response['CognomeDirigente'] = $dirigente['CognomeDirigente'];
-          $response['NomeDirigente'] = $dirigente['NomeDirigente'];
-          $response['EmailDirigente'] = $dirigente['EmailDirigente'];
-          $response['TelefonoDirigente'] = $dirigente['TelefonoDirigente'];
+		  $response['Prof'] = $dirigente['Prof'];
+          $response['CognomeDirigente'] = $dirigente['cognome'];
+          $response['NomeDirigente'] = $dirigente['nome'];
+          $response['EmailDirigente'] = $dirigente['email'];
+          $response['TelefonoDirigente'] = $dirigente['telefono'];
       } else {
           $response['message'] = "Il dirigente non e' presente nel database.";
       }
       echoResponse(200, $response);
 });
 
-$app->get('/get_studente/:id', function($id_stud) { //DA VERIFICARE SE FUNZIONA
+$app->get('/get_studente/:id', function($id_stud) { //FUNZIONA
     
     $response = array();
     $db = new DbHandler();
 
         $studente = $db->getStudente($id_stud);
         if($studente != null) {
-          $response['CognomeStudente'] = $studente['CognomeStudente'];
-          $response['NomeStudente'] = $studente['NomeStudente'];
-          $response['EmailStudente'] = $studente['EmailStudente'];
+          $response['CognomeStudente'] = $studente['cognome'];
+          $response['NomeStudente'] = $studente['nome'];
+          $response['EmailStudente'] = $studente['email'];
       } else {
           $response['message'] = "Lo studente non e' presente nel database.";
       }
       echoResponse(200, $response);
 });
 
-$app->get('/searchUtente/:type/:testo', function($type,$testo) { //DA VERIFICARE SE FUNZIONA
+$app->get('/searchUtente/:type/:testo', function($type,$testo) { //FUNZIONA
     
     $response = array();
     $db = new DbHandler();
